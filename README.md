@@ -1,54 +1,62 @@
+
 # SprintFlow AI
 
-**An AI-powered project management platform for software teams** — plan projects, break work into tasks with AI, track it all on a Kanban board, and monitor progress with live analytics.
+**An AI-powered project management platform for software teams.** Plan projects, break work into tasks using AI, manage them on a Kanban board, and track progress with live analytics — all in one place.
 
-🔗 **Live App:** https://sprintflow-ai-eta.vercel.app
+🔗 **Live Application:** https://sprintflow-ai-eta.vercel.app
 🔗 **Source Code:** https://github.com/22Nm1a0530/sprintflow-ai
 
 ---
 
-## Overview
+## What This Project Is
 
-Every software team eventually needs the same thing: a shared place to plan work, assign it, and track it to completion. SprintFlow AI provides that — with one meaningful difference from a typical project tracker: instead of manually typing out every task when starting a new feature, a user can **describe what they're building in plain English**, and an AI model instantly generates a realistic, ready-to-use task breakdown, which drops straight onto the Kanban board.
+Every software team needs a shared place to plan work, assign it, and track it through to completion. SprintFlow AI is that place — with one meaningful difference from a typical project tracker: instead of manually typing out every task by hand when starting new work, a user can **describe what they're building in plain English**, and an AI model instantly generates a realistic, ready-to-use task breakdown that drops straight onto the Kanban board.
 
-**Core flow:** Sign up → create a project → describe a feature to the AI Task Generator → tasks appear instantly → manage them on the Kanban board → watch project progress and analytics update automatically as work moves forward.
-
-The project was built as a response to a technical assessment with the following requirements: build a web app with real business value using AI, version control it on Git, set up CI/CD, deploy it, and document it — all of which are demonstrated below.
+This project was built end-to-end — frontend, AI integration, authentication, a real hosted database, automated deployment pipeline, and documentation — as a response to a technical assessment requiring exactly that scope.
 
 ---
 
-## Feature Breakdown
+## How to Explore This App (Recommended Walkthrough)
 
-### Authentication & Accounts
-- Email/password signup and login, with per-role account creation (Developer, Project Manager, Admin)
-- **Real password reset flow** — requesting a reset sends an actual email (via EmailJS) containing a secure, time-limited token. Clicking the link opens a reset page that works from *any device*, not just the one the request originated from — this required moving account data to a real hosted database (see [Architecture](#architecture-decisions) below for why)
-- Protected routes — the app redirects unauthenticated users away from internal pages automatically
+The fastest way to evaluate this project is to actually use it. Here is exactly what to click, in order, and what each screen demonstrates:
 
-### Role-Based Access Control
-- **Admin / Project Manager** — full access: create projects, create tasks, manage the team's work
-- **Developer** — can view and update tasks (move them across the Kanban board, mark progress) but cannot create new projects or tasks, keeping project-level decisions with leads/managers
+**1. Landing Page** (`/`)
+The homepage. Shows an animated, auto-cycling preview of the actual app (Dashboard, Kanban, AI Generator, and Analytics screens), so you can see the product before signing up.
 
-### Projects
-- Create, view, and manage multiple projects, each with a priority level, due date, and description
-- Project progress bars **update automatically** — as tasks tied to a project move to "Done" on the Kanban board, the project's completion percentage recalculates with no manual step
+**2. Sign Up** (`/signup`)
+Click **"Start Free"** or **"Get Demo"** from the landing page. Create an account with any name, email, and password, and choose a role — Developer, Project Manager, or Admin (see [Role-Based Access](#role-based-access-control) below for what changes per role).
 
-### Kanban Board
-- Four-column workflow: To Do → In Progress → Review → Done
-- Full drag-and-drop task management, task creation scoped to a specific project, and one-click task deletion
+**3. Dashboard** (`/dashboard`)
+Right after signup, you'll land here. This is the home base — a summary of active projects, pending tasks, and overall progress, pulled from real data, not placeholders.
 
-### AI Task Generator
-- Powered by Groq's hosted LLM (`llama-3.3-70b-versatile`)
-- Describe a feature or project in a sentence or two, and the AI returns a set of concrete, relevant tasks
-- Generated tasks can be added directly to the selected project's Kanban board in one click
+**Note on sample data:** to make the app immediately explorable rather than starting on a completely blank screen, every new account is seeded with a few sample projects and tasks out of the box. These are simply starter/demo content meant to showcase how the app looks and behaves once real work is added — feel free to edit, complete, or delete them, or create entirely new projects from scratch to test the full flow yourself.
 
-### Analytics Dashboard
-- Live charts (via Recharts) showing task completion trends and project velocity, computed from real task data — not placeholder numbers
+**4. Projects** (`/projects`)
+View existing (sample) projects, or click **"New Project"** to create your own — set a name, description, priority, and due date. Each project shows a live progress bar.
 
-### Settings & Profile
-- Editable name/email, with light/dark theme toggle persisted across sessions
+**5. Kanban Board** (`/kanban`)
+The core workspace. Tasks are organized into four columns — **To Do → In Progress → Review → Done**. Drag any task card between columns to update its status; the linked project's progress bar updates automatically as a result — no manual syncing required.
 
-### Error Handling
-- Custom 404 page for any unmatched route, keeping navigation graceful instead of showing a blank or broken screen
+**6. AI Task Generator** (`/ai-tools`)
+This is the AI-powered centerpiece of the app. Select a project, type a short description of a feature you want to build (for example: *"add user notifications with email and in-app alerts"*), and the AI instantly generates a realistic set of tasks with priorities. Click **"Add to Kanban"** to drop them straight onto the board for that project.
+
+**7. Analytics** (`/analytics`)
+Real charts (not mockups) showing task completion trends over time and overall velocity, computed live from whatever tasks currently exist in your account.
+
+**8. Settings** (`/settings`)
+Edit your profile (name/email) and toggle between light and dark theme — your preference is remembered on future visits.
+
+**9. Forgot Password** (from the Login page)
+Click **"Forgot password?"** on the login screen, enter your email, and a real password reset email is sent (via EmailJS) to that inbox — not a simulated message. The reset link works from any device, including a phone, because account data is stored in a real cloud database rather than the browser alone (explained further below).
+
+---
+
+## Role-Based Access Control
+
+SprintFlow AI supports three roles, chosen at signup:
+
+- **Admin** and **Project Manager** — full access: create and manage projects, create and assign tasks
+- **Developer** — can view, update, and move tasks on the Kanban board, but cannot create new projects or tasks — keeping project-level planning decisions with leads and managers, while developers focus on execution
 
 ---
 
@@ -58,10 +66,10 @@ The project was built as a response to a technical assessment with the following
 | Technology | Purpose |
 |---|---|
 | **React 19 + TypeScript** | Core UI framework with compile-time type safety |
-| **Vite** | Build tool and dev server |
+| **Vite** | Build tool and development server |
 | **Tailwind CSS v4** | Utility-first styling |
 | **shadcn/ui** | Accessible, pre-built UI primitives (dialogs, buttons, cards) |
-| **Framer Motion** | Page transitions, hover states, and micro-interactions |
+| **Framer Motion** | Page transitions, hover states, and animated micro-interactions |
 | **React Router DOM** | Client-side routing |
 | **React Hook Form + Zod** | Form state management and schema validation |
 | **Recharts** | Analytics charts |
@@ -70,56 +78,65 @@ The project was built as a response to a technical assessment with the following
 ### Data & Services
 | Technology | Purpose |
 |---|---|
-| **Supabase** (hosted PostgreSQL) | Stores user accounts and password-reset tokens — the only data that genuinely needs to be shared across devices |
-| **Browser localStorage** | Stores projects, tasks, and Kanban state |
+| **Supabase** (hosted PostgreSQL) | Stores user accounts and password-reset tokens — the data that genuinely needs to work across multiple devices |
+| **Browser localStorage** | Stores projects, tasks, and Kanban board state |
 | **Groq API** (`llama-3.3-70b-versatile`) | Generates AI task suggestions from natural-language project descriptions |
-| **EmailJS** | Sends real, templated password-reset emails directly from the frontend, with no email server to maintain |
+| **EmailJS** | Sends real, templated password-reset emails directly from the frontend, with no email server to build or maintain |
 
 ### DevOps
 | Technology | Purpose |
 |---|---|
-| **GitHub Actions** | Runs an automated build check (`npm ci && npm run build`) on every push to `main`, catching build failures before they reach production |
-| **Vercel** | Auto-deploys the latest passing build to the live URL, with environment variables managed centrally in its dashboard |
+| **GitHub Actions** | Runs an automated build check (`npm ci && npm run build`) on every push to `main`, catching failures before they reach production |
+| **Vercel** | Automatically builds and deploys the latest passing commit to the live URL, with environment variables managed centrally in its dashboard |
 
 ---
 
-## Architecture Decisions
+## Why the Architecture Is Split Between Supabase and localStorage
 
-**Why is data split between Supabase and localStorage instead of one or the other?**
+This is a deliberate, scoped engineering decision, not an inconsistency:
 
-This was a deliberate, scoped decision rather than an inconsistency:
+- **Accounts and password-reset tokens live in Supabase**, a real hosted database, because they have a hard requirement to work across devices — a user might request a password reset on a laptop and need to open that email and complete the reset on their phone. That's only possible if both devices read from the same shared database, rather than each device's own separate local browser storage.
+- **Projects, tasks, and Kanban data live in localStorage** because, for the scope of this assessment, they don't carry that same cross-device requirement — a user manages their board from whichever device they're actively working on in a given session. This kept the majority of the app's data layer simple and fast to build, while still solving the one place where a shared backend was genuinely necessary.
 
-- **Accounts and password-reset tokens live in Supabase** because they have a hard requirement to work across devices. A user might request a password reset on a laptop and open the confirmation email on their phone — that only works if both devices are reading from the same shared database, not each device's own local browser storage.
-- **Projects, tasks, and Kanban data live in localStorage** because, for the scope of this assessment, they don't carry that same cross-device requirement — a user manages their board from whichever device they're actively working on. This kept the majority of the app's data layer simple and fast to build, while still solving the one place where a shared backend was genuinely necessary.
+A production version of this app would extend the same Supabase-backed approach to all data for full cross-device sync.
 
-A production version of this app would move everything to Supabase (or an equivalent backend) for full cross-device sync of all data, not just accounts.
-
-**Why Groq instead of Gemini?**
-
-The AI Task Generator originally used Google's Gemini API. During development, a quota restriction unrelated to the implementation made Gemini unreliable for consistent use, so the integration was switched to Groq's API, which has been stable and fast in testing. The Gemini SDK dependency remains installed but unused — a visible trace of that decision rather than something hidden.
+**Why Groq instead of Gemini?** The AI Task Generator originally used Google's Gemini API. During development, a quota restriction unrelated to the implementation made it unreliable for consistent use, so the integration was switched to Groq's API, which has been fast and stable in testing throughout the rest of the project.
 
 ---
-
 ## Project Structure
+
+​```
 sprintflow-ai/
-├── vercel.json # SPA routing config for Vercel (see note below)
-├── .github/
-│ └── workflows/
-│ └── ci.yml # GitHub Actions CI pipeline
-└── frontend/
-├── .env # API keys (gitignored, not committed)
+├── .github/workflows/ci.yml    — CI pipeline (build check on every push)
 ├── src/
-│ ├── components/ # Reusable UI: navbar, layout, dialogs, shadcn primitives
-│ ├── context/ # App-wide state: auth session, theme
-│ ├── lib/ # Shared helpers and form validation schemas
-│ ├── pages/ # Every screen — Landing, Auth, Dashboard, Kanban, Projects, Analytics, Settings, NotFound
-│ ├── routes/ # Route definitions (AppRoutes.tsx)
-│ ├── services/ # All external communication: Supabase, Groq AI, EmailJS, and localStorage-backed project/task logic
-│ └── types/ # Shared TypeScript types
-└── package.json
+│   ├── components/             — Reusable UI: navbar, layout, dialogs, shadcn primitives
+│   ├── context/                — App-wide state: auth session, theme
+│   ├── lib/                    — Shared helpers and form validation
+│   ├── pages/                  — Every screen in the app
+│   │   ├── Landing/               — Animated marketing homepage
+│   │   ├── Auth/                   — Login, Signup, Forgot/Reset Password
+│   │   ├── Dashboard/              — Home summary after login
+│   │   ├── Projects/               — Project list and creation
+│   │   ├── Kanban/                 — Drag-and-drop task board
+│   │   ├── AITools/                — AI Task Generator
+│   │   ├── Analytics/              — Charts and progress tracking
+│   │   ├── Settings/               — Profile and theme preferences
+│   │   └── NotFound/               — Custom 404 page
+│   ├── routes/AppRoutes.tsx    — Maps every URL to its page
+│   ├── services/                — All external communication logic
+│   │   ├── authService.ts          — Signup, login, password reset (Supabase)
+│   │   ├── supabaseClient.ts       — Supabase connection setup
+│   │   ├── emailService.ts         — Sends password reset emails (EmailJS)
+│   │   ├── aiService.ts            — Calls Groq's AI model
+│   │   ├── projectService.ts       — Project CRUD (localStorage)
+│   │   └── taskService.ts          — Task CRUD (localStorage)
+│   └── types/                   — Shared TypeScript types
+├── vercel.json                  — Client-side routing support for Vercel
+├── package.json
+└── README.md
+​```
 
-
-> **Note on `vercel.json`:** this app uses client-side routing (React Router). Without this config, directly visiting any URL other than the homepage (e.g. `/dashboard`) on the deployed site would return a 404, because Vercel's server would look for a matching file instead of letting React handle the route. This file tells Vercel to serve `index.html` for all paths and let the app take over routing from there.
+> **Note on `vercel.json`:** this app uses client-side routing (React Router). Without this file, directly visiting any URL other than the homepage on the deployed site (for example `/dashboard`) would return a 404, because Vercel's server would look for a matching physical file instead of letting React handle the route. This config tells Vercel to serve `index.html` for every path and let the app take over routing from there.
 
 ---
 
@@ -129,11 +146,12 @@ sprintflow-ai/
 
 ```bash
 git clone https://github.com/22Nm1a0530/sprintflow-ai.git
-cd sprintflow-ai/frontend
+cd sprintflow-ai
 npm install
 ```
 
-Create a `.env` file inside the `frontend` folder:
+Create a `.env` file in the project root with your own keys:
+
 
 VITE_GROQ_API_KEY=your_groq_api_key
 VITE_EMAILJS_SERVICE_ID=your_emailjs_service_id
@@ -143,7 +161,7 @@ VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 
-Start the dev server:
+Start the development server:
 
 ```bash
 npm run dev
@@ -155,21 +173,21 @@ The app will be available at `http://localhost:5173`.
 
 ## CI/CD & Deployment
 
-**Continuous Integration:** every push to `main` triggers a GitHub Actions workflow (`.github/workflows/ci.yml`) that installs dependencies and runs a production build (`npm ci && npm run build`). If the build fails, the failure is visible directly on GitHub before anything reaches production.
+**Continuous Integration:** every push to `main` triggers a GitHub Actions workflow (`.github/workflows/ci.yml`) that installs dependencies and runs a full production build (`npm ci && npm run build`). Build failures are visible directly on GitHub before anything reaches production.
 
-**Continuous Deployment:** Vercel is connected directly to this repository. Every successful push to `main` is automatically built and deployed to the live URL above — no manual deployment step is required. Environment variables for all connected services (Groq, EmailJS, Supabase) are configured in Vercel's dashboard, mirroring the local `.env` file.
+**Continuous Deployment:** Vercel is connected directly to this repository. Every successful push to `main` is automatically built and deployed to the live URL above — no manual deployment step required. Environment variables for all connected services (Groq, EmailJS, Supabase) are configured centrally in Vercel's dashboard, mirroring the local `.env` file.
 
 ---
 
 ## Known Limitations & Future Improvements
 
-Being transparent about tradeoffs made under a tight timeline:
+Being transparent about the tradeoffs made under a tight project timeline:
 
-- **Passwords are stored as plain text** in the Supabase `users` table. A production system would hash passwords (e.g. with bcrypt) before storing them — this was a scope tradeoff, not an oversight, and is the top priority for a "next version."
-- **Projects and tasks don't yet sync across devices** — only accounts do (see [Architecture Decisions](#architecture-decisions)). A full migration to a shared backend for all data is the natural next step.
+- **Passwords are stored as plain text** in the Supabase `users` table. A production system would hash passwords (e.g. with bcrypt) before storing them — this was a scope tradeoff, not an oversight, and would be the top priority for a "next version."
+- **Projects and tasks don't yet sync across devices** — only accounts and password resets do (see [Architecture](#why-the-architecture-is-split-between-supabase-and-localstorage) above). Extending the same shared-database approach to all data is the natural next step.
 - **Admin and Project Manager roles currently share identical permissions.** A future version would give Admins exclusive account-management and team-administration capabilities.
 - **Settings notifications are currently a static visual display**, not a live notification system tied to real events.
-- **No automated test suite yet** — manual testing was used throughout development given the project timeline; unit and integration tests (e.g. with Vitest) would be a natural addition.
+- **No automated test suite yet** — manual, feature-by-feature testing was used throughout development given the project timeline; unit and integration tests (e.g. with Vitest) would be a natural next addition.
 
 ---
 
@@ -177,3 +195,4 @@ Being transparent about tradeoffs made under a tight timeline:
 
 **Dalai Sai Deepika**
 Built as a technical assessment submission.
+
