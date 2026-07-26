@@ -1,40 +1,8 @@
 import type { User, UserRole } from "../types/auth";
-
-interface StoredAccount {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole;
-}
-
-const ACCOUNTS_KEY = "sprintflow_accounts";
-const RESET_TOKENS_KEY = "sprintflow_reset_tokens";
-function getAccounts(): StoredAccount[] {
-  const raw = localStorage.getItem(ACCOUNTS_KEY);
-  return raw ? JSON.parse(raw) : [];
-}
-
-function saveAccounts(accounts: StoredAccount[]) {
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
-}
+import { supabase } from "./supabaseClient";
 
 function generateToken(): string {
   return `sf_${Math.random().toString(36).slice(2)}${Date.now().toString(36)}`;
-}
-interface ResetTokenEntry {
-  token: string;
-  email: string;
-  expiresAt: number;
-}
-
-function getResetTokens(): ResetTokenEntry[] {
-  const raw = localStorage.getItem(RESET_TOKENS_KEY);
-  return raw ? JSON.parse(raw) : [];
-}
-
-function saveResetTokens(tokens: ResetTokenEntry[]) {
-  localStorage.setItem(RESET_TOKENS_KEY, JSON.stringify(tokens));
 }
 
 export async function signup(
@@ -43,31 +11,31 @@ export async function signup(
   password: string,
   role: UserRole = "developer"
 ): Promise<{ user: User; token: string }> {
-  await new Promise((r) => setTimeout(r, 500)); // simulate network delay
+  const { data: existing } = await supabase
+    .from("users")
+    .select("id")
+    .ilike("email", email)
+    .maybeSingle();
 
-  const accounts = getAccounts();
-  const exists = accounts.some((a) => a.email.toLowerCase() === email.toLowerCase());
-
-  if (exists) {
+  if (existing) {
     throw new Error("An account with this email already exists.");
   }
 
-  const newAccount: StoredAccount = {
-    id: crypto.randomUUID(),
-    name,
-    email,
-    password,
-    role,
-  };
+  const { data, error } = await supabase
+    .from("users")
+    .insert({ name, email, password, role })
+    .select()
+    .single();
 
-  accounts.push(newAccount);
-  saveAccounts(accounts);
+  if (error || !data) {
+    throw new Error("Signup failed. Please try again.");
+  }
 
   const user: User = {
-    id: newAccount.id,
-    name: newAccount.name,
-    email: newAccount.email,
-    role: newAccount.role,
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
   };
 
   return { user, token: generateToken() };
@@ -77,81 +45,87 @@ export async function login(
   email: string,
   password: string
 ): Promise<{ user: User; token: string }> {
-  await new Promise((r) => setTimeout(r, 500)); // simulate network delay
+  const { data, error } = await supabase
+    .from("users")
+    .select("*")
+    .ilike("email", email)
+    .eq("password", password)
+    .maybeSingle();
 
-  const accounts = getAccounts();
-  const account = accounts.find(
-    (a) => a.email.toLowerCase() === email.toLowerCase() && a.password === password
-  );
-
-  if (!account) {
+  if (error || !data) {
     throw new Error("Invalid email or password.");
   }
 
   const user: User = {
-    id: account.id,
-    name: account.name,
-    email: account.email,
-    role: account.role,
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
   };
 
   return { user, token: generateToken() };
 }
+
 export async function updateUserProfile(
   userId: string,
   updates: { name: string; email: string }
 ): Promise<User> {
-  await new Promise((r) => setTimeout(r, 400));
+  const { data: emailTaken } = await supabase
+    .from("users")
+    .select("id")
+    .ilike("email", updates.email)
+    .neq("id", userId)
+    .maybeSingle();
 
-  const raw = localStorage.getItem("sprintflow_accounts");
-  const accounts: StoredAccount[] = raw ? JSON.parse(raw) : [];
-  const account = accounts.find((a) => a.id === userId);
-
-  if (!account) {
-    throw new Error("Account not found.");
-  }
-
-  const emailTaken = accounts.some(
-    (a) => a.id !== userId && a.email.toLowerCase() === updates.email.toLowerCase()
-  );
   if (emailTaken) {
     throw new Error("This email is already in use.");
   }
 
-  account.name = updates.name;
-  account.email = updates.email;
-  localStorage.setItem("sprintflow_accounts", JSON.stringify(accounts));
+  const { data, error } = await supabase
+    .from("users")
+    .update({ name: updates.name, email: updates.email })
+    .eq("id", userId)
+    .select()
+    .single();
+
+  if (error || !data) {
+    throw new Error("Failed to update profile.");
+  }
 
   const updatedUser: User = {
-    id: account.id,
-    name: account.name,
-    email: account.email,
-    role: account.role,
+    id: data.id,
+    name: data.name,
+    email: data.email,
+    role: data.role,
   };
 
   localStorage.setItem("sprintflow_user", JSON.stringify(updatedUser));
 
   return updatedUser;
 }
+
 export async function requestPasswordReset(email: string): Promise<string | null> {
-  await new Promise((r) => setTimeout(r, 400));
+  const { data: account } = await supabase
+    .from("users")
+    .select("id, email")
+    .ilike("email", email)
+    .maybeSingle();
 
-  const accounts = getAccounts();
-  const account = accounts.find((a) => a.email.toLowerCase() === email.toLowerCase());
-
-  // Always behave the same whether or not the account exists (don't leak which emails are registered).
   if (!account) {
     return null;
   }
 
   const token = generateToken();
-  const tokens = getResetTokens().filter((t) => t.email.toLowerCase() !== email.toLowerCase());
-  tokens.push({
-    token,
-    email: account.email,
-    expiresAt: Date.now() + 60 * 60 * 1000, // 1 hour
-  });
-  saveResetTokens(tokens);
+  const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+
+ const { error } = await supabase
+    .from("password_reset_tokens")
+    .insert({ token, email: account.email, expires_at: expiresAt });
+
+  if (error) {
+    console.error("Password reset token insert failed:", error);
+    throw new Error("Something went wrong. Please try again.");
+  }
 
   return token;
 }
@@ -160,27 +134,27 @@ export async function resetPasswordWithToken(
   token: string,
   newPassword: string
 ): Promise<void> {
-  await new Promise((r) => setTimeout(r, 400));
-
-  const tokens = getResetTokens();
-  const entry = tokens.find((t) => t.token === token);
+  const { data: entry } = await supabase
+    .from("password_reset_tokens")
+    .select("*")
+    .eq("token", token)
+    .maybeSingle();
 
   if (!entry) {
     throw new Error("This reset link is invalid.");
   }
-  if (entry.expiresAt < Date.now()) {
+  if (new Date(entry.expires_at).getTime() < Date.now()) {
     throw new Error("This reset link has expired. Please request a new one.");
   }
 
-  const accounts = getAccounts();
-  const account = accounts.find((a) => a.email.toLowerCase() === entry.email.toLowerCase());
-  if (!account) {
-    throw new Error("Account not found.");
+  const { error: updateError } = await supabase
+    .from("users")
+    .update({ password: newPassword })
+    .ilike("email", entry.email);
+
+  if (updateError) {
+    throw new Error("Failed to reset password.");
   }
 
-  account.password = newPassword;
-  saveAccounts(accounts);
-
-  // Invalidate the token after use.
-  saveResetTokens(tokens.filter((t) => t.token !== token));
+  await supabase.from("password_reset_tokens").delete().eq("token", token);
 }
