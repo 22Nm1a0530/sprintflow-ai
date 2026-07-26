@@ -1,7 +1,10 @@
+import AITaskGenerator from "../pages/AITools/AITaskGenerator";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LandingPage from "../pages/Landing/LandingPage";
 import MainLayout from "../components/layout/MainLayout";
 import Login from "../pages/Auth/Login";
+import ForgotPassword from "../pages/Auth/ForgotPassword";
+import ResetPassword from "../pages/Auth/ResetPassword";
 import Signup from "../pages/Auth/Signup";
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Projects from "../pages/Projects/Projects";
@@ -24,6 +27,8 @@ function AppRoutes() {
         />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/signup" element={<Signup />} />
 
         <Route
@@ -63,6 +68,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/ai-tools"
+          element={
+            <ProtectedRoute>
+              <AITaskGenerator />
             </ProtectedRoute>
           }
         />

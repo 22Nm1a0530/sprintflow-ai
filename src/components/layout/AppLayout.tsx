@@ -7,6 +7,8 @@ import {
   BarChart3,
   Settings,
   LogOut,
+  Wand2,
+
   Sparkles,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -15,6 +17,7 @@ const navItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { label: "Projects", path: "/projects", icon: FolderKanban },
   { label: "Kanban", path: "/kanban", icon: KanbanSquare },
+  { label: "AI Tools", path: "/ai-tools", icon: Wand2 },
   { label: "Analytics", path: "/analytics", icon: BarChart3 },
   { label: "Settings", path: "/settings", icon: Settings },
 ];

@@ -50,3 +50,32 @@ export async function deleteProject(id: string): Promise<void> {
   const projects = getProjects().filter((p) => p.id !== id);
   saveProjects(projects);
 }
+
+export function getProjectsSync(): Project[] {
+  return getProjects();
+}
+
+export function recalculateProjectProgress(projectId: string, allTasks: { projectId: string; status: string }[]) {
+  const projects = getProjects();
+  const project = projects.find((p) => p.id === projectId);
+  if (!project) return;
+
+  const projectTasks = allTasks.filter((t) => t.projectId === projectId);
+
+  if (projectTasks.length === 0) {
+    project.progress = 0;
+  } else {
+    const doneCount = projectTasks.filter((t) => t.status === "done").length;
+    project.progress = Math.round((doneCount / projectTasks.length) * 100);
+  }
+
+  if (project.progress === 100) {
+    project.status = "completed";
+  } else if (project.progress === 0) {
+    project.status = project.status === "completed" ? "active" : project.status;
+  } else {
+    project.status = project.status === "completed" ? "active" : project.status;
+  }
+
+  saveProjects(projects);
+}

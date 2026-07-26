@@ -51,10 +51,13 @@ function LandingPage() {
                 Start Free
               </Link>
 
-              <button className="min-w-[200px] flex items-center justify-center gap-3 whitespace-nowrap rounded-2xl border border-slate-700 px-10 py-5 text-lg font-semibold transition-all duration-300 hover:scale-105 hover:border-cyan-500">
-                Live Demo
+              <Link
+                to="/signup"
+                className="min-w-[200px] flex items-center justify-center gap-3 whitespace-nowrap rounded-2xl border border-slate-700 px-10 py-5 text-lg font-semibold transition-all duration-300 hover:scale-105 hover:border-cyan-500"
+              >
+                Get Demo
                 <ArrowRight size={20} />
-              </button>
+              </Link>
             </div>
 
             <div style={{ height: "48px" }} />

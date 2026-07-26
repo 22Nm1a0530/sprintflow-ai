@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import AppLayout from "../../components/layout/AppLayout";
-import { fetchProjects, type Project } from "../../services/projectService";
-import { Calendar, Users, Plus } from "lucide-react";
-
+import NewProjectDialog from "../../components/projects/NewProjectDialog";
+import { fetchProjects, deleteProject, type Project } from "../../services/projectService";
+import { Calendar, Users, Plus, X } from "lucide-react";
 const statusColors: Record<Project["status"], string> = {
   active: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
   completed: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
@@ -19,6 +19,7 @@ const priorityColors: Record<Project["priority"], string> = {
 function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchProjects().then((data) => {
@@ -27,6 +28,14 @@ function Projects() {
     });
   }, []);
 
+ function handleProjectCreated(newProject: Project) {
+    setProjects((prev) => [newProject, ...prev]);
+  }
+
+  async function handleDeleteProject(id: string) {
+    setProjects((prev) => prev.filter((p) => p.id !== id));
+    await deleteProject(id);
+  }
   return (
     <AppLayout>
       <div>
@@ -35,7 +44,10 @@ function Projects() {
             <h1 className="text-3xl font-bold">Projects</h1>
             <p className="mt-1 text-slate-400">Manage and track all your projects</p>
           </div>
-          <button className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 font-semibold text-white transition hover:scale-105 hover:bg-cyan-400">
+          <button
+            onClick={() => setDialogOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 font-semibold text-white transition hover:scale-105 hover:bg-cyan-400"
+          >
             <Plus size={18} />
             New Project
           </button>
@@ -56,9 +68,15 @@ function Projects() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.06 }}
                 whileHover={{ y: -4 }}
-                className="rounded-2xl border border-white/10 bg-slate-900/50 p-6 shadow-lg shadow-black/20 transition-colors hover:border-white/20"
+                className="group relative rounded-2xl border border-white/10 bg-slate-900/50 p-6 shadow-lg shadow-black/20 transition-colors hover:border-white/20"
               >
-                <div className="flex items-start justify-between">
+                <button
+                  onClick={() => handleDeleteProject(project.id)}
+                  className="absolute right-4 top-4 rounded-md p-1 text-slate-500 opacity-0 transition hover:bg-red-500/10 hover:text-red-400 group-hover:opacity-100"
+                >
+                  <X size={16} />
+                </button>
+                <div className="flex items-start justify-between pr-6">
                   <h3 className="text-lg font-semibold">{project.name}</h3>
                   <span className={`rounded-full border px-3 py-1 text-xs font-medium capitalize ${statusColors[project.status]}`}>
                     {project.status.replace("_", " ")}
@@ -97,6 +115,12 @@ function Projects() {
           </div>
         )}
       </div>
+
+      <NewProjectDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        onCreated={handleProjectCreated}
+      />
     </AppLayout>
   );
 }
