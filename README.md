@@ -106,39 +106,36 @@ A production version of this app would extend the same Supabase-backed approach 
 
 ## Project Structure
 
-
+​```
 sprintflow-ai/
-├── .github/
-│   └── workflows/
-│       └── ci.yml              — GitHub Actions CI pipeline (build check on every push)
+├── .github/workflows/ci.yml    — CI pipeline (build check on every push)
 ├── src/
 │   ├── components/             — Reusable UI: navbar, layout, dialogs, shadcn primitives
-│   ├── context/                 — App-wide state: authentication session, theme (light/dark)
-│   ├── lib/                     — Shared helper functions and form validation schemas
-│   ├── pages/                   — Every screen in the app:
-│   │   ├── Landing/                — Animated marketing homepage
-│   │   ├── Auth/                    — Login, Signup, Forgot Password, Reset Password
-│   │   ├── Dashboard/               — Home summary after login
-│   │   ├── Projects/                — Project list and creation
-│   │   ├── Kanban/                  — Drag-and-drop task board
-│   │   ├── AITools/                 — AI Task Generator
-│   │   ├── Analytics/               — Charts and progress tracking
-│   │   ├── Settings/                — Profile and theme preferences
-│   │   └── NotFound/                — Custom 404 page
-│   ├── routes/
-│   │   └── AppRoutes.tsx        — Maps every URL to its page
-│   ├── services/                 — All external communication logic:
-│   │   ├── authService.ts          — Signup, login, password reset (Supabase-backed)
+│   ├── context/                — App-wide state: auth session, theme
+│   ├── lib/                    — Shared helpers and form validation
+│   ├── pages/                  — Every screen in the app
+│   │   ├── Landing/               — Animated marketing homepage
+│   │   ├── Auth/                   — Login, Signup, Forgot/Reset Password
+│   │   ├── Dashboard/              — Home summary after login
+│   │   ├── Projects/               — Project list and creation
+│   │   ├── Kanban/                 — Drag-and-drop task board
+│   │   ├── AITools/                — AI Task Generator
+│   │   ├── Analytics/              — Charts and progress tracking
+│   │   ├── Settings/               — Profile and theme preferences
+│   │   └── NotFound/               — Custom 404 page
+│   ├── routes/AppRoutes.tsx    — Maps every URL to its page
+│   ├── services/                — All external communication logic
+│   │   ├── authService.ts          — Signup, login, password reset (Supabase)
 │   │   ├── supabaseClient.ts       — Supabase connection setup
 │   │   ├── emailService.ts         — Sends password reset emails (EmailJS)
-│   │   ├── aiService.ts            — Calls Groq's AI model for task generation
-│   │   ├── projectService.ts       — Project CRUD (localStorage-backed)
-│   │   └── taskService.ts          — Task CRUD (localStorage-backed)
-│   └── types/                    — Shared TypeScript type definitions
-├── vercel.json                  — Tells Vercel to support client-side routing (see note below)
+│   │   ├── aiService.ts            — Calls Groq's AI model
+│   │   ├── projectService.ts       — Project CRUD (localStorage)
+│   │   └── taskService.ts          — Task CRUD (localStorage)
+│   └── types/                   — Shared TypeScript types
+├── vercel.json                  — Client-side routing support for Vercel
 ├── package.json
 └── README.md
-
+​```
 
 > **Note on `vercel.json`:** this app uses client-side routing (React Router). Without this file, directly visiting any URL other than the homepage on the deployed site (for example `/dashboard`) would return a 404, because Vercel's server would look for a matching physical file instead of letting React handle the route. This config tells Vercel to serve `index.html` for every path and let the app take over routing from there.
 
