@@ -20,34 +20,34 @@ This project was built end-to-end — frontend, AI integration, authentication, 
 
 The fastest way to evaluate this project is to actually use it. Here is exactly what to click, in order, and what each screen demonstrates:
 
-**1. Landing Page** (`/`)
+**1. Landing Page (`/`)**
 The homepage. Shows an animated, auto-cycling preview of the actual app (Dashboard, Kanban, AI Generator, and Analytics screens), so you can see the product before signing up.
 
-**2. Sign Up** (`/signup`)
-Click **"Start Free"** or **"Get Demo"** from the landing page. Create an account with any name, email, and password, and choose a role — Developer, Project Manager, or Admin (see [Role-Based Access](#role-based-access-control) below for what changes per role).
+**2. Sign Up (`/signup`)**
+Click "Start Free" or "Get Demo" from the landing page. Create an account with any name, email, and password, and choose a role — Developer, Project Manager, or Admin (see [Role-Based Access Control](#role-based-access-control) below for what changes per role).
 
-**3. Dashboard** (`/dashboard`)
+**3. Dashboard (`/dashboard`)**
 Right after signup, you'll land here. This is the home base — a summary of active projects, pending tasks, and overall progress, pulled from real data, not placeholders.
 
 **Note on sample data:** to make the app immediately explorable rather than starting on a completely blank screen, every new account is seeded with a few sample projects and tasks out of the box. These are simply starter/demo content meant to showcase how the app looks and behaves once real work is added — feel free to edit, complete, or delete them, or create entirely new projects from scratch to test the full flow yourself.
 
-**4. Projects** (`/projects`)
-View existing (sample) projects, or click **"New Project"** to create your own — set a name, description, priority, and due date. Each project shows a live progress bar.
+**4. Projects (`/projects`)**
+View existing (sample) projects, or click "New Project" to create your own — set a name, description, priority, and due date. Each project shows a live progress bar.
 
-**5. Kanban Board** (`/kanban`)
-The core workspace. Tasks are organized into four columns — **To Do → In Progress → Review → Done**. Drag any task card between columns to update its status; the linked project's progress bar updates automatically as a result — no manual syncing required.
+**5. Kanban Board (`/kanban`)**
+The core workspace. Tasks are organized into four columns — To Do → In Progress → Review → Done. Drag any task card between columns to update its status; the linked project's progress bar updates automatically as a result — no manual syncing required.
 
-**6. AI Task Generator** (`/ai-tools`)
-This is the AI-powered centerpiece of the app. Select a project, type a short description of a feature you want to build (for example: *"add user notifications with email and in-app alerts"*), and the AI instantly generates a realistic set of tasks with priorities. Click **"Add to Kanban"** to drop them straight onto the board for that project.
+**6. AI Task Generator (`/ai-tools`)**
+This is the AI-powered centerpiece of the app. Select a project, type a short description of a feature you want to build (for example: "add user notifications with email and in-app alerts"), and the AI instantly generates a realistic set of tasks with priorities. Click "Add to Kanban" to drop them straight onto the board for that project.
 
-**7. Analytics** (`/analytics`)
+**7. Analytics (`/analytics`)**
 Real charts (not mockups) showing task completion trends over time and overall velocity, computed live from whatever tasks currently exist in your account.
 
-**8. Settings** (`/settings`)
+**8. Settings (`/settings`)**
 Edit your profile (name/email) and toggle between light and dark theme — your preference is remembered on future visits.
 
-**9. Forgot Password** (from the Login page)
-Click **"Forgot password?"** on the login screen, enter your email, and a real password reset email is sent (via EmailJS) to that inbox — not a simulated message. The reset link works from any device, including a phone, because account data is stored in a real cloud database rather than the browser alone (explained further below).
+**9. Forgot Password (from the Login page)**
+Click "Forgot password?" on the login screen, enter your email, and a real password reset email is sent (via EmailJS) to that inbox — not a simulated message. The reset link works from any device, including a phone, because account data is stored in a real cloud database rather than the browser alone (explained further below).
 
 ---
 
@@ -103,40 +103,39 @@ A production version of this app would extend the same Supabase-backed approach 
 **Why Groq instead of Gemini?** The AI Task Generator originally used Google's Gemini API. During development, a quota restriction unrelated to the implementation made it unreliable for consistent use, so the integration was switched to Groq's API, which has been fast and stable in testing throughout the rest of the project.
 
 ---
+
 ## Project Structure
 
-​```
-sprintflow-ai/
-├── .github/workflows/ci.yml    — CI pipeline (build check on every push)
-├── src/
-│   ├── components/             — Reusable UI: navbar, layout, dialogs, shadcn primitives
-│   ├── context/                — App-wide state: auth session, theme
-│   ├── lib/                    — Shared helpers and form validation
-│   ├── pages/                  — Every screen in the app
-│   │   ├── Landing/               — Animated marketing homepage
-│   │   ├── Auth/                   — Login, Signup, Forgot/Reset Password
-│   │   ├── Dashboard/              — Home summary after login
-│   │   ├── Projects/               — Project list and creation
-│   │   ├── Kanban/                 — Drag-and-drop task board
-│   │   ├── AITools/                — AI Task Generator
-│   │   ├── Analytics/              — Charts and progress tracking
-│   │   ├── Settings/               — Profile and theme preferences
-│   │   └── NotFound/               — Custom 404 page
-│   ├── routes/AppRoutes.tsx    — Maps every URL to its page
-│   ├── services/                — All external communication logic
-│   │   ├── authService.ts          — Signup, login, password reset (Supabase)
-│   │   ├── supabaseClient.ts       — Supabase connection setup
-│   │   ├── emailService.ts         — Sends password reset emails (EmailJS)
-│   │   ├── aiService.ts            — Calls Groq's AI model
-│   │   ├── projectService.ts       — Project CRUD (localStorage)
-│   │   └── taskService.ts          — Task CRUD (localStorage)
-│   └── types/                   — Shared TypeScript types
-├── vercel.json                  — Client-side routing support for Vercel
-├── package.json
-└── README.md
-​```
+    sprintflow-ai/
+    ├── .github/workflows/ci.yml    — CI pipeline (build check on every push)
+    ├── src/
+    │   ├── components/             — Reusable UI: navbar, layout, dialogs, shadcn primitives
+    │   ├── context/                — App-wide state: auth session, theme
+    │   ├── lib/                    — Shared helpers and form validation
+    │   ├── pages/                  — Every screen in the app
+    │   │   ├── Landing/               — Animated marketing homepage
+    │   │   ├── Auth/                   — Login, Signup, Forgot/Reset Password
+    │   │   ├── Dashboard/              — Home summary after login
+    │   │   ├── Projects/               — Project list and creation
+    │   │   ├── Kanban/                 — Drag-and-drop task board
+    │   │   ├── AITools/                — AI Task Generator
+    │   │   ├── Analytics/              — Charts and progress tracking
+    │   │   ├── Settings/               — Profile and theme preferences
+    │   │   └── NotFound/               — Custom 404 page
+    │   ├── routes/AppRoutes.tsx    — Maps every URL to its page
+    │   ├── services/                — All external communication logic
+    │   │   ├── authService.ts          — Signup, login, password reset (Supabase)
+    │   │   ├── supabaseClient.ts       — Supabase connection setup
+    │   │   ├── emailService.ts         — Sends password reset emails (EmailJS)
+    │   │   ├── aiService.ts            — Calls Groq's AI model
+    │   │   ├── projectService.ts       — Project CRUD (localStorage)
+    │   │   └── taskService.ts          — Task CRUD (localStorage)
+    │   └── types/                   — Shared TypeScript types
+    ├── vercel.json                  — Client-side routing support for Vercel
+    ├── package.json
+    └── README.md
 
-> **Note on `vercel.json`:** this app uses client-side routing (React Router). Without this file, directly visiting any URL other than the homepage on the deployed site (for example `/dashboard`) would return a 404, because Vercel's server would look for a matching physical file instead of letting React handle the route. This config tells Vercel to serve `index.html` for every path and let the app take over routing from there.
+**Note on `vercel.json`:** this app uses client-side routing (React Router). Without this file, directly visiting any URL other than the homepage on the deployed site (for example `/dashboard`) would return a 404, because Vercel's server would look for a matching physical file instead of letting React handle the route. This config tells Vercel to serve `index.html` for every path and let the app take over routing from there.
 
 ---
 
@@ -152,14 +151,14 @@ npm install
 
 Create a `.env` file in the project root with your own keys:
 
-
+```
 VITE_GROQ_API_KEY=your_groq_api_key
 VITE_EMAILJS_SERVICE_ID=your_emailjs_service_id
 VITE_EMAILJS_TEMPLATE_ID=your_emailjs_template_id
 VITE_EMAILJS_PUBLIC_KEY=your_emailjs_public_key
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
+```
 
 Start the development server:
 
@@ -195,4 +194,6 @@ Being transparent about the tradeoffs made under a tight project timeline:
 
 **Dalai Sai Deepika**
 Built as a technical assessment submission.
+
+
 
