@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import AppLayout from "../../components/layout/AppLayout";
+import { useAuth } from "../../context/AuthContext";
 import NewProjectDialog from "../../components/projects/NewProjectDialog";
 import { fetchProjects, deleteProject, type Project } from "../../services/projectService";
 import { Calendar, Users, Plus, X } from "lucide-react";
@@ -17,6 +18,8 @@ const priorityColors: Record<Project["priority"], string> = {
 };
 
 function Projects() {
+  const { user } = useAuth();
+  const canCreate = user?.role === "admin" || user?.role === "project_manager";
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -44,13 +47,15 @@ function Projects() {
             <h1 className="text-3xl font-bold">Projects</h1>
             <p className="mt-1 text-slate-400">Manage and track all your projects</p>
           </div>
-          <button
-            onClick={() => setDialogOpen(true)}
-            className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 font-semibold text-white transition hover:scale-105 hover:bg-cyan-400"
-          >
-            <Plus size={18} />
-            New Project
-          </button>
+          {canCreate && (
+            <button
+              onClick={() => setDialogOpen(true)}
+              className="flex items-center gap-2 rounded-xl bg-cyan-500 px-5 py-2.5 font-semibold text-white transition hover:scale-105 hover:bg-cyan-400"
+            >
+              <Plus size={18} />
+              New Project
+            </button>
+          )}
         </div>
 
         {loading ? (
