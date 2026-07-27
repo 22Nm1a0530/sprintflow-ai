@@ -1,3 +1,4 @@
+import { supabase } from "./supabaseClient";
 import { recalculateProjectProgress } from "./projectService";
 
 export interface Task {
@@ -11,76 +12,96 @@ export interface Task {
   completedAt?: string;
 }
 
-const TASKS_KEY = "sprintflow_tasks";
-
-const defaultTasks: Task[] = [
-  { id: "1", title: "Design login screen", description: "Create wireframes for the new login flow", status: "done", priority: "medium", assignee: "sai", projectId: "1" },
-  { id: "2", title: "Set up CI pipeline", description: "Configure GitHub Actions for build + lint", status: "in_progress", priority: "high", assignee: "sai", projectId: "1" },
-  { id: "3", title: "Write API documentation", description: "Document all REST endpoints", status: "todo", priority: "low", assignee: "sai", projectId: "2" },
-  { id: "4", title: "Fix navbar responsiveness", description: "Navbar breaks on tablet width", status: "review", priority: "medium", assignee: "sai", projectId: "1" },
-  { id: "5", title: "Add dark mode toggle", description: "Wire theme switch into settings page", status: "todo", priority: "medium", assignee: "sai", projectId: "3" },
-  { id: "6", title: "Optimize bundle size", description: "Reduce Vite build output size", status: "in_progress", priority: "low", assignee: "sai", projectId: "2" },
-];
-
-function getTasks(): Task[] {
-  const raw = localStorage.getItem(TASKS_KEY);
-  if (!raw) {
-    localStorage.setItem(TASKS_KEY, JSON.stringify(defaultTasks));
-    return defaultTasks;
-  }
-  return JSON.parse(raw);
-}
-
-function saveTasks(tasks: Task[]) {
-  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+function mapRow(row: any): Task {
+  return {
+    id: String(row.id),
+    title: row.title,
+    description: row.description,
+    status: row.status,
+    priority: row.priority,
+    assignee: row.assignee,
+    projectId: String(row.project_id),
+    completedAt: row.completed_at ?? undefined,
+  };
 }
 
 export async function fetchTasks(): Promise<Task[]> {
-  await new Promise((r) => setTimeout(r, 400));
-  return getTasks();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapRow);
 }
 
 export async function fetchTasksByProject(projectId: string): Promise<Task[]> {
-  await new Promise((r) => setTimeout(r, 200));
-  return getTasks().filter((t) => t.projectId === projectId);
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("*")
+    .eq("project_id", projectId);
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map(mapRow);
 }
 
 export async function updateTaskStatus(id: string, status: Task["status"]): Promise<void> {
-  const tasks = getTasks();
-  const task = tasks.find((t) => t.id === id);
-  if (task) {
-    task.status = status;
-    if (status === "done") {
-      task.completedAt = new Date().toISOString();
-    } else {
-      task.completedAt = undefined;
-    }
-    saveTasks(tasks);
-    recalculateProjectProgress(task.projectId, tasks);
-  }
+  const completedAt = status === "done" ? new Date().toISOString() : null;
+
+  const { data: updated, error } = await supabase
+    .from("tasks")
+    .update({ status, completed_at: completedAt })
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error || !updated) return;
+
+  const allTasks = await fetchTasks();
+  await recalculateProjectProgress(String(updated.project_id), allTasks);
 }
 
 export async function createTask(data: Omit<Task, "id">): Promise<Task> {
-  await new Promise((r) => setTimeout(r, 300));
-  const tasks = getTasks();
-  const newTask: Task = { ...data, id: crypto.randomUUID() };
-  tasks.push(newTask);
-  saveTasks(tasks);
-  recalculateProjectProgress(newTask.projectId, tasks);
-  return newTask;
+  const { data: row, error } = await supabase
+    .from("tasks")
+    .insert({
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      priority: data.priority,
+      assignee: data.assignee,
+      project_id: data.projectId,
+    })
+    .select()
+    .single();
+
+  if (error || !row) {
+    throw new Error("Failed to create task.");
+  }
+
+  const allTasks = await fetchTasks();
+  await recalculateProjectProgress(data.projectId, allTasks);
+
+  return mapRow(row);
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  await new Promise((r) => setTimeout(r, 200));
-  const tasks = getTasks();
-  const task = tasks.find((t) => t.id === id);
-  const remaining = tasks.filter((t) => t.id !== id);
-  saveTasks(remaining);
-  if (task) {
-    recalculateProjectProgress(task.projectId, remaining);
-  }
-}
+  const { data: existing } = await supabase
+    .from("tasks")
+    .select("project_id")
+    .eq("id", id)
+    .maybeSingle();
 
-export function getAllTasksSync(): Task[] {
-  return getTasks();
+  await supabase.from("tasks").delete().eq("id", id);
+
+  if (existing) {
+    const allTasks = await fetchTasks();
+    await recalculateProjectProgress(String(existing.project_id), allTasks);
+  }
 }
