@@ -12,6 +12,8 @@ import Kanban from "../pages/Kanban/Kanban";
 import Analytics from "../pages/Analytics/Analytics";
 import Settings from "../pages/Settings/Settings";
 import ProtectedRoute from "../components/common/ProtectedRoute";
+import NotFound from "../pages/NotFound/NotFound";
+import TeamMembers from "../pages/Team/TeamMembers";
 
 function AppRoutes() {
   return (
@@ -72,6 +74,14 @@ function AppRoutes() {
           }
         />
         <Route
+          path="/team"
+          element={
+            <ProtectedRoute>
+              <TeamMembers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/ai-tools"
           element={
             <ProtectedRoute>
@@ -79,6 +89,7 @@ function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

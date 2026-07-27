@@ -163,7 +163,7 @@ function Signup() {
               >
                 <option value="developer" className="bg-slate-900">Developer</option>
                 <option value="project_manager" className="bg-slate-900">Project Manager</option>
-                <option value="admin" className="bg-slate-900">Administrator</option>
+                
               </select>
             </div>
 

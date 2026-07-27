@@ -118,12 +118,11 @@ export async function requestPasswordReset(email: string): Promise<string | null
   const token = generateToken();
   const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
 
- const { error } = await supabase
+  const { error } = await supabase
     .from("password_reset_tokens")
     .insert({ token, email: account.email, expires_at: expiresAt });
 
   if (error) {
-    console.error("Password reset token insert failed:", error);
     throw new Error("Something went wrong. Please try again.");
   }
 
@@ -157,4 +156,38 @@ export async function resetPasswordWithToken(
   }
 
   await supabase.from("password_reset_tokens").delete().eq("token", token);
+}
+
+export async function fetchAllUsers(): Promise<User[]> {
+  const { data, error } = await supabase
+    .from("users")
+    .select("id, name, email, role, created_at");
+
+  if (error) {
+    throw new Error("Failed to fetch users: " + error.message);
+  }
+
+  return data || [];
+}
+
+export async function updateUserRole(userId: string, newRole: UserRole): Promise<void> {
+  const { error } = await supabase
+    .from("users")
+    .update({ role: newRole })
+    .eq("id", userId);
+
+  if (error) {
+    throw new Error("Failed to update user role: " + error.message);
+  }
+}
+
+export async function deleteUserAccount(userId: string): Promise<void> {
+  const { error } = await supabase
+    .from("users")
+    .delete()
+    .eq("id", userId);
+
+  if (error) {
+    throw new Error("Failed to delete user account: " + error.message);
+  }
 }

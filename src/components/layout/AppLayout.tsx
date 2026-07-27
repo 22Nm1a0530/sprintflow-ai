@@ -7,13 +7,13 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  Wand2,
-
   Sparkles,
+  Wand2,
+  Shield,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const navItems = [
+const baseNavItems = [
   { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
   { label: "Projects", path: "/projects", icon: FolderKanban },
   { label: "Kanban", path: "/kanban", icon: KanbanSquare },
@@ -21,11 +21,12 @@ const navItems = [
   { label: "Analytics", path: "/analytics", icon: BarChart3 },
   { label: "Settings", path: "/settings", icon: Settings },
 ];
+const adminNavItem = { label: "Team", path: "/team", icon: Shield };
 
 function AppLayout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
-
+  const navItems = user?.role === "admin" ? [...baseNavItems, adminNavItem] : baseNavItems;
   return (
     <div className="flex min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-white">
       <aside className="fixed left-0 top-0 flex h-screen w-64 flex-col border-r border-slate-200 bg-white backdrop-blur-xl dark:border-white/10 dark:bg-slate-900/50">
